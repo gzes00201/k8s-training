@@ -21,10 +21,45 @@ spec:
         app: hello-ami-part2
     spec:
       containers:
-      - image: gcr.io/gcp-20190909-01/k8s-test:v1
+      - image: gcr.io/gcp-20190909-01/k8s-test:v6
         imagePullPolicy: IfNotPresent
         name: k8s-test-sha256-1
         ports:
             - name: http
               containerPort: 3000
+              protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: hello-ami-redis
+  name: hello-ami-redis
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-ami-redis
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: hello-ami-redis
+    spec:
+      containers:
+      - image: redis
+        lifecycle:
+          postStart:
+            exec:
+              command: [ "/bin/sh", "-c", "redis-cli config set requirepass amitest" ]
+        imagePullPolicy: IfNotPresent
+        name: hello-ami-redis
+        ports:
+            - name: http
+              containerPort: 6379
               protocol: TCP
