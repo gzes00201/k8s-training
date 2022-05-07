@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    cloud.google.com/neg: '{"ingress":true}'
+  finalizers:
+  - service.kubernetes.io/load-balancer-cleanup
+  labels:
+    app: hello-ami-part2
+    manager: kube-controller-manager
+  name: hello-ami-part2-service
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: hello-ami-part2
+  type: LoadBalancer
+  # loadBalancerSourceRanges:
+  # - 1.2.3.4/32
+  # - 5.6.7.8/32
