@@ -1,0 +1,22 @@
+# Default values for wanda.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+global:
+  hub: gcr.io/gcp-20190909-01
+image:
+  repository: k8s-test
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: v6
+
+service:
+  type: LoadBalancer
+  port: 3000
+  targetPort: 3000
+
+health:
+  readyPath: "/ping"
+

@@ -1,0 +1,74 @@
+---
+# Source: ami-helm/charts/hello-ami-part2/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    cloud.google.com/neg: '{"ingress":true}'
+  finalizers:
+  - service.kubernetes.io/load-balancer-cleanup
+  labels:
+    manager: kube-controller-manager
+    helm.sh/chart: hello-ami-part2-0.1.0
+    app.kubernetes.io/name: hello-ami-part2
+    app.kubernetes.io/instance: ami-helm
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  name: ami-helm-hello-ami-part2
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: hello-ami-part2
+    app.kubernetes.io/instance: ami-helm
+---
+# Source: ami-helm/charts/hello-ami-part2/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ami-helm-hello-ami-part2
+  labels:
+    helm.sh/chart: hello-ami-part2-0.1.0
+    app.kubernetes.io/name: hello-ami-part2
+    app.kubernetes.io/instance: ami-helm
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hello-ami-part2
+      app.kubernetes.io/instance: ami-helm
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hello-ami-part2
+        app.kubernetes.io/instance: ami-helm
+    spec:
+      containers:
+        - name: hello-ami-part2
+          image: "/gcr.io/gcp-20190909-01/k8s-test:v6"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: http
+          resources:
+            null
