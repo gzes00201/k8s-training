@@ -1,0 +1,37 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  # annotations:
+  #   storageclass.beta.kubernetes.io/is-default-class: "true"
+  #   如果有这一条，则会成为 default-class，创建 PVC 时不指定类型则自动使用此类型
+  name: mongo-db
+provisioner: kubernetes.io/gce-pd        ## 指定 Volumn 類型
+parameters:                              ## PV 符合條件
+  type: pd-ssd
+reclaimPolicy: Retain                    ## 回收機制
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongo-db-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: mongo-db
+  hostPath:
+    path: /tmp
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-db-pvc
+spec:
+  storageClassName: mongo-db
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

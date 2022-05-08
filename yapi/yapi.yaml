@@ -1,0 +1,86 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    app: yapi-pod
+  name: yapi-pod
+spec:
+  selector:
+    matchLabels:
+      app: yapi-pod
+  template:
+    metadata:
+      labels:
+        app: yapi-pod
+    spec:
+      restartPolicy: Always
+      containers:
+        #mongo
+        - image: mongo:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 27017
+          name: mongo
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: "yapi"
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              value: "admin.yapi"
+            - name: MONGO_INITDB_DATABASE
+              value: "yapi"
+          # volumeMounts:
+          #   - name: mongo-db
+          #     mountPath: /data/db
+        #yapi
+        - image: jayfong/yapi:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          name: yapi
+          env:
+            #管理员账号,禁止注册,默认密码： ymfe.org 登录请修改
+            - name: YAPI_ADMIN_ACCOUNT
+              value: "admin@qq.com"
+            - name: YAPI_ADMIN_PASSWORD
+              value: "admin123"
+            - name: YAPI_CLOSE_REGISTER
+              value: "true"
+            #mongodb 配置
+            - name: YAPI_DB_SERVERNAME
+              value: "127.0.0.1"
+            - name: YAPI_DB_PORT
+              value: "27017"
+            - name: YAPI_DB_DATABASE
+              value: "yapi"
+            - name: YAPI_DB_USER
+              value: "yapi"
+            - name: YAPI_DB_PASS
+              value: "admin.yapi"
+            - name: YAPI_DB_AUTH_SOURCE
+              value: "admin"
+      # volumes:
+      #   - name: mongo-db
+      #     hostPath:
+      #       path: /data/yapi/mongo
+      #       type: DirectoryOrCreate 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    cloud.google.com/neg: '{"ingress":true}'
+  finalizers:
+  - service.kubernetes.io/load-balancer-cleanup
+  labels:
+    app: yapi-svc
+    manager: kube-controller-manager
+  name: yapi-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: yapi-pod
+  ports:
+  - port: 3003
+    protocol: TCP
+    targetPort: 3000
