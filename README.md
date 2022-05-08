@@ -39,3 +39,13 @@ $ docker run --name phpmyadmin -d --link mysql -e PMA_HOST="mysql" -p 8080:80 ph
 $ docker start mysql
 $ docker start phpmyadmin
 ```
+
+# helm版
+1. [ping 連結](http://34.81.228.97:3000/ping)
+2. ./helm 內
+3. helm install ami-helm ./ami-helm
+4. 服務同上面的
+
+# yapi
+1. [ping 連結](http://34.80.232.191:3003/)
+2. 帳號 admin@qq.com 密碼 admin123
